@@ -1,7 +1,7 @@
 # Elemental Machines Kiosk
 
 Electron-based kiosk application for the Elemental Machines dashboard.
-This app is not affiliated with or endorsed by Elemental Machines.
+This app is a personal project for convenience and is not affiliated with or endorsed by Elemental Machines.
 
 ## Overview
 
