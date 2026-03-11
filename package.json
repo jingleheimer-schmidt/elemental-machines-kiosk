@@ -2,7 +2,10 @@
   "name": "elemental-machines-kiosk",
   "version": "0.1.5",
   "description": "Cross-platform Electron kiosk app for the Elemental Machines dashboard",
-  "author": "Elemental Machines",
+  "author": {
+    "name": "Jules",
+    "email": "jules@jules.click"
+  },
   "main": "main.js",
   "private": true,
   "license": "UNLICENSED",
@@ -52,7 +55,8 @@
         "AppImage",
         "deb"
       ],
-      "category": "Utility"
+      "category": "Utility",
+      "maintainer": "Jules <jules@jules.click>"
     },
     "nsis": {
       "oneClick": false,
