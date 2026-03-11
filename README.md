@@ -98,3 +98,23 @@ If the new target uses a different origin, update the allowlist at the same time
 - Packaging is configured with `electron-builder` for macOS, Windows, and Linux.
 - This MVP does not include code signing, notarization, or auto-update.
 - Cross-platform installers are usually built on the matching operating system or in CI; the scripts are included even if local cross-compilation is limited.
+
+## Automated GitHub Releases
+
+Pushes to `main` now trigger GitHub Actions to:
+
+- bump and tag a new version
+- build macOS, Windows, and Linux installers
+- create a GitHub Release and attach all generated artifacts
+
+The workflow lives at `.github/workflows/release.yml`.
+
+### Version bump rules
+
+Versioning is automatic and based on commit messages since the previous tag:
+
+- `major`: commit message contains `BREAKING CHANGE` or `!:`
+- `minor`: commit subject starts with `feat:` or `feat(...):`
+- `patch`: all other commits
+
+If no special markers are found, the workflow defaults to a patch release.

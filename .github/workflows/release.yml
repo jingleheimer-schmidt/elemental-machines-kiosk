@@ -1,0 +1,131 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  version:
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.bump.outputs.version }}
+      tag: ${{ steps.bump.outputs.tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Bump version, tag, and push
+        id: bump
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git fetch --tags --force
+
+          LAST_TAG="$(git describe --tags --abbrev=0 2>/dev/null || true)"
+          if [ -n "$LAST_TAG" ]; then
+            COMMITS="$(git log "${LAST_TAG}..HEAD" --format=%B)"
+          else
+            COMMITS="$(git log --format=%B)"
+          fi
+
+          BUMP_TYPE="patch"
+          if echo "$COMMITS" | grep -Eiq 'BREAKING CHANGE|!:'; then
+            BUMP_TYPE="major"
+          elif echo "$COMMITS" | grep -Eiq '^feat(\(|:)' ; then
+            BUMP_TYPE="minor"
+          fi
+
+          NEW_VERSION="$(npm version "$BUMP_TYPE" --no-git-tag-version | sed 's/^v//')"
+          NEW_TAG="v${NEW_VERSION}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add package.json package-lock.json
+          git commit -m "chore(release): ${NEW_TAG} [skip ci]"
+          git tag "$NEW_TAG"
+
+          git push origin HEAD:main --follow-tags
+
+          echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$NEW_TAG" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: version
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            build_script: build:mac
+          - os: windows-latest
+            build_script: build:win
+          - os: ubuntu-latest
+            build_script: build:linux
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.version.outputs.tag }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build package
+        run: npm run ${{ matrix.build_script }}
+
+      - name: Upload built artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts-${{ matrix.os }}
+          if-no-files-found: error
+          path: |
+            release/*.dmg
+            release/*.zip
+            release/*.exe
+            release/*.AppImage
+            release/*.deb
+            release/*.blockmap
+            release/latest*.yml
+
+  release:
+    needs:
+      - version
+      - build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: artifacts-*
+          merge-multiple: true
+          path: dist
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.version.outputs.tag }}
+          name: Elemental Machines Kiosk ${{ needs.version.outputs.version }}
+          generate_release_notes: true
+          files: dist/**/*
+          fail_on_unmatched_files: true
