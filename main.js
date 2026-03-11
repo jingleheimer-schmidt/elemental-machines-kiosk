@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, session, shell } = require('electron');
+const { app, BrowserWindow, Menu, powerSaveBlocker, session, shell } = require('electron');
 
 const DEFAULT_TARGET_URL = 'https://dashboard.elementalmachines.io/users/sign_in';
 const TARGET_URL = process.env.KIOSK_TARGET_URL || DEFAULT_TARGET_URL;
@@ -7,6 +7,7 @@ const isDevelopment = !app.isPackaged || process.env.NODE_ENV === 'development';
 const isWindowedMode = isDevelopment && process.env.WINDOWED === 'true';
 
 let mainWindow;
+let displaySleepBlockerId = null;
 
 const singleInstanceLock = app.requestSingleInstanceLock();
 
@@ -131,6 +132,26 @@ function configureSessionPermissions(partition) {
   kioskSession.setPermissionCheckHandler(() => false);
 }
 
+function startDisplaySleepBlocker() {
+  if (displaySleepBlockerId !== null && powerSaveBlocker.isStarted(displaySleepBlockerId)) {
+    return;
+  }
+
+  displaySleepBlockerId = powerSaveBlocker.start('prevent-display-sleep');
+}
+
+function stopDisplaySleepBlocker() {
+  if (displaySleepBlockerId === null) {
+    return;
+  }
+
+  if (powerSaveBlocker.isStarted(displaySleepBlockerId)) {
+    powerSaveBlocker.stop(displaySleepBlockerId);
+  }
+
+  displaySleepBlockerId = null;
+}
+
 function createMainWindow() {
   const allowedOrigins = getAllowedOrigins();
 
@@ -190,6 +211,7 @@ app.on('second-instance', () => {
 
 app.whenReady().then(() => {
   app.setAppUserModelId('io.elementalmachines.kiosk');
+  startDisplaySleepBlocker();
   configureSessionPermissions(PERSISTENT_PARTITION);
   Menu.setApplicationMenu(buildApplicationMenu());
   createMainWindow();
@@ -208,6 +230,7 @@ app.on('window-all-closed', () => {
 });
 
 app.on('before-quit', () => {
+  stopDisplaySleepBlocker();
   const kioskSession = session.fromPartition(PERSISTENT_PARTITION);
   kioskSession.flushStorageData();
 });
