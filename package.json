@@ -1,6 +1,6 @@
 {
   "name": "elemental-machines-kiosk",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Cross-platform Electron kiosk app for the Elemental Machines dashboard",
   "author": {
     "name": "Jules",
