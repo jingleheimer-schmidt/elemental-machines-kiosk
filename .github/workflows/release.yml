@@ -15,9 +15,10 @@ jobs:
     outputs:
       version: ${{ steps.bump.outputs.version }}
       tag: ${{ steps.bump.outputs.tag }}
+      sha: ${{ steps.bump.outputs.sha }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -62,6 +63,7 @@ jobs:
 
           echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
           echo "tag=$NEW_TAG" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
   build:
     needs: version
@@ -77,10 +79,10 @@ jobs:
           - os: ubuntu-latest
             build_script: build:linux
     steps:
-      - name: Checkout release tag
-        uses: actions/checkout@v4
+      - name: Checkout release commit
+        uses: actions/checkout@v5
         with:
-          ref: ${{ needs.version.outputs.tag }}
+          ref: ${{ needs.version.outputs.sha }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
