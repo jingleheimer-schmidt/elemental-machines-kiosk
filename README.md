@@ -19,7 +19,7 @@ Minimal Electron MVP for a dedicated desktop kiosk app that opens the Elemental 
 
 ## Setup
 
-1. Install Node.js 22.12.0 or newer.
+1. Install Node.js 24 or newer.
 2. Install dependencies:
 
 ```bash
