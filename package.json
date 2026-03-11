@@ -4,7 +4,7 @@
   "description": "Cross-platform Electron kiosk app for the Elemental Machines dashboard",
   "author": {
     "name": "Jules",
-    "email": "jules@jules.click"
+    "email": "em-kiosk@jules.click"
   },
   "main": "main.js",
   "private": true,
@@ -56,7 +56,7 @@
         "deb"
       ],
       "category": "Utility",
-      "maintainer": "Jules <jules@jules.click>"
+      "maintainer": "Jules <em-kiosk@jules.click>"
     },
     "nsis": {
       "oneClick": false,
