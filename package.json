@@ -1,6 +1,6 @@
 {
   "name": "elemental-machines-kiosk",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Electron Kiosk for the Elemental Machines Dashboard",
   "author": {
     "name": "Jules",
