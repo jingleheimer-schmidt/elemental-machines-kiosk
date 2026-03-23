@@ -30,15 +30,14 @@ if not defined CHROME_BIN (
 
 if not exist "%PROFILE_DIR%" (
   mkdir "%PROFILE_DIR%"
-)
-
-if errorlevel 1 (
-  echo Failed to create the kiosk Chrome profile directory:
-  echo   %PROFILE_DIR%
-  echo.
-  echo Press any key to close...
-  pause >nul
-  exit /b 1
+  if errorlevel 1 (
+    echo Failed to create the kiosk Chrome profile directory:
+    echo   %PROFILE_DIR%
+    echo.
+    echo Press any key to close...
+    pause >nul
+    exit /b 1
+  )
 )
 
 start "" "%CHROME_BIN%" ^
@@ -47,14 +46,6 @@ start "" "%CHROME_BIN%" ^
   --user-data-dir="%PROFILE_DIR%" ^
   --no-first-run ^
   --no-default-browser-check
-
-if errorlevel 1 (
-  echo Failed to launch Google Chrome.
-  echo.
-  echo Press any key to close...
-  pause >nul
-  exit /b 1
-)
 
 endlocal
 exit /b 0

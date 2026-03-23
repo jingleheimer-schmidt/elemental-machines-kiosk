@@ -24,7 +24,12 @@ if [[ ! -x "$CHROME_BIN" ]]; then
   exit 1
 fi
 
-mkdir -p "$PROFILE_DIR"
+if ! mkdir -p "$PROFILE_DIR"; then
+  printf 'Failed to create the kiosk Chrome profile directory:\n%s\n' "$PROFILE_DIR" >&2
+  exit 1
+fi
+
+LAUNCH_LOG="$(mktemp -t elemental-machines-kiosk-launch.XXXXXX.log)"
 
 nohup "$CHROME_BIN" \
   --app="$TARGET_URL" \
@@ -32,7 +37,22 @@ nohup "$CHROME_BIN" \
   --user-data-dir="$PROFILE_DIR" \
   --no-first-run \
   --no-default-browser-check \
-  >/dev/null 2>&1 &
+  >"$LAUNCH_LOG" 2>&1 &
+
+CHROME_PID=$!
+sleep 1
+
+if ! kill -0 "$CHROME_PID" 2>/dev/null; then
+  printf 'Failed to launch Google Chrome.\n' >&2
+  if [[ -s "$LAUNCH_LOG" ]]; then
+    printf 'Chrome startup output:\n' >&2
+    cat "$LAUNCH_LOG" >&2
+  fi
+  rm -f "$LAUNCH_LOG"
+  exit 1
+fi
+
+rm -f "$LAUNCH_LOG"
 
 trap - EXIT
 exit 0
