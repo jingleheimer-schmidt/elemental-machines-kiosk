@@ -18,7 +18,7 @@ if not exist "%PROFILE_DIR%" (
 
 start "" "%CHROME_BIN%" ^
   --app="%TARGET_URL%" ^
-  --start-fullscreen ^
+  --kiosk ^
   --user-data-dir="%PROFILE_DIR%" ^
   --no-first-run ^
   --no-default-browser-check
