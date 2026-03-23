@@ -9,10 +9,7 @@ if exist "%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe" set "CHROME_BIN=%
 if not defined CHROME_BIN if exist "%ProgramFiles%\Google\Chrome\Application\chrome.exe" set "CHROME_BIN=%ProgramFiles%\Google\Chrome\Application\chrome.exe"
 if not defined CHROME_BIN if exist "%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe" set "CHROME_BIN=%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe"
 
-if not defined CHROME_BIN (
-  echo Google Chrome was not found.
-  exit /b 1
-)
+if not defined CHROME_BIN exit /b 1
 
 if not exist "%PROFILE_DIR%" (
   mkdir "%PROFILE_DIR%"
@@ -21,6 +18,7 @@ if not exist "%PROFILE_DIR%" (
 
 start "" "%CHROME_BIN%" ^
   --app="%TARGET_URL%" ^
+  --start-fullscreen ^
   --user-data-dir="%PROFILE_DIR%" ^
   --no-first-run ^
   --no-default-browser-check
